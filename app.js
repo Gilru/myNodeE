@@ -1,6 +1,9 @@
 // const mongoose = require("mongoose");
 // const userSchema = require("./userSchema");
-    const server = require("./server")
+    const server = require("./Setup/server")
+    const app = server();
+    const api = require("./api");
+    const wagner = require("wagner-core")
 // const productSchema = require("./productSchema");
 // const categorySchema = require("./categorySchema");
 // mongoose.connect('mongodb://localhost/test');
@@ -33,9 +36,13 @@
 //     console.log(doc + " we just log out")
 // })
 
-server().listen(3000,function () {
+
+api(app);
+app.listen(3000,function () {
     console.log(" Server is listening at port 3000");
 })
+
+
 
 
 
