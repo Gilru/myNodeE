@@ -4,8 +4,9 @@
   "description": "",
   "main": "app.js",
   "scripts": {
-    "test": "mocha ../",
-    "server": "node app.js"
+    "test": "node_modules/mocha/bin/mocha",
+    "server": "node app.js",
+    "apiTest": "node_modules/mocha/bin/mocha Test/apiTest.js"
   },
   "author": "",
   "license": "ISC",

@@ -13,7 +13,7 @@ var categorySchema = {
     }]
 }
 
-// "id": Laptop,parent: Electronics, id: Phone parent: Electronics
+// product/id/:id, product/category/:id
 
 module.exports = new mongoose.Schema(categorySchema)
 module.exports.categorySchema = categorySchema;
