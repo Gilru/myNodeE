@@ -6,7 +6,7 @@ const db = require("./db");
 
 var mongoose = db.connect();
 
-
+//TODO use _.each to loop
 var Category = mongoose.model("Category", categorySchema);
 var User = mongoose.model("User", userSchema);
 var Product = mongoose.model("Product", productSchema);

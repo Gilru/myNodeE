@@ -3,6 +3,7 @@ var Schema = mongoose.Schema;
 
 
 module.exports = new Schema({
+
     profile: {
         username: {
             type: String,

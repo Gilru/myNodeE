@@ -1,6 +1,7 @@
 const assert = require("assert");
 const wagner = require("wagner-core")
 const factory = require("../Setup/factory")(wagner);
+var product;
 beforeEach(deleteEverything)
 
 describe("Category", function () {
@@ -29,46 +30,10 @@ describe("Category", function () {
 
     })
 })
-
-
-//TODO describe User,product
-
-describe("User", function () {
-    it("should create a new User and Save it", function (done) {
-
-        wagner.invoke(function (User) {
-            var user = new User({
-                profile: {
-                    username: "gil",
-                    email: "example@email.com"
-                }
-
-
-            })
-
-            assert.equal(user.profile.username, "gil");
-            assert.equal(user.profile.email, "example@email.com");
-
-            user.save(function (err, cat) {
-                User.findOne({username: "gil"}, function (err, cat) {
-                    if (err) assert.ifError(err);
-                    assert.equal(user.profile.username, "gil")
-                    assert.equal(user.profile.email, "example@email.com")
-                    done();
-                })
-            })
-
-
-        });
-
-    })
-})
-
-
 describe("Product", function () {
     it("should create a new User and Save it", function (done) {
         wagner.invoke(function (Product) {
-            var product = new Product({
+            product = new Product({
                 name: "Iphone",
                 price: {
                     amount: 23,
@@ -97,12 +62,55 @@ describe("Product", function () {
     })
 })
 
+//TODO describe User,product
+
+describe("User", function () {
+    it("should create a new User and Save it", function (done) {
+
+        wagner.invoke(function (User) {
+            console.log(product._id)
+            var user = new User({
+                profile: {
+                    username: "gil",
+                    email: "example@email.com"
+                },
+                data: {
+                    cart: {
+                        product: product._id
+                    }
+                }
+
+
+            })
+
+            assert.equal(user.profile.username, "gil");
+            assert.equal(user.profile.email, "example@email.com");
+
+            user.save(function (err, cat) {
+
+                User.findOne({username: "gil"}).populate("data.cart.product").exec(function (err, users) {
+                    if (err)console.log(err)
+
+                    assert.equal(user.profile.username, "gil")
+                    assert.equal(user.profile.email, "example@email.com")
+                    assert.equal(user.data.cart[0].product, product._id)
+                    done();
+                })
+
+
+            })
+
+
+        });
+
+    })
+})
+
+
 after(deleteEverything)
 
 
-
-
-function deleteEverything () {
+function deleteEverything() {
     //TODO: use an array to shorter the code
 
     wagner.invoke(function (Category) {

@@ -8,10 +8,11 @@ const ObjectId = require('mongoose').Types.ObjectId;
 module.exports = function (app) {
 
     var router = express.Router();
-    app.use("/api/v1/category", router)
+    app.use("/api/v1", router)
 
     //====================only create a quick database======================
     var categoy;
+    var product;
     wagner.invoke(function (Category) {
 
         Category.remove({}).exec();
@@ -29,7 +30,7 @@ module.exports = function (app) {
 
         Product.remove({}).exec();
 
-        var product = new Product({
+        product = new Product({
             name: "Iphone",
             price: {
                 amount: 15,
@@ -41,6 +42,29 @@ module.exports = function (app) {
         product.save();
 
     })
+
+    wagner.invoke(function (User) {
+        User.remove({}).exec();
+
+        var user = new User({
+            profile: {
+                username:" Gilbert",
+                email: "example@email.com"
+            },
+            data: {
+                cart: {
+                    product: product._id
+                }
+
+            }
+        })
+
+        // user.data.cart.push(product._id);
+
+        user.save();
+    })
+
+
 
 
 
@@ -70,7 +94,7 @@ module.exports = function (app) {
 
            Product.find({_id: new ObjectId(req.params.id)},function (err, product) {
                if (err)  res.status(status.INTERNAL_SERVER_ERROR).json(err.message);
-               console.log(new ObjectId(req.params.id))
+
                res.json(product);
            })
 
@@ -85,7 +109,7 @@ module.exports = function (app) {
 
             Product.find(function (err, product) {
                 if (err)  res.status(status.INTERNAL_SERVER_ERROR).json(err.message);
-                console.log(new ObjectId(req.params.id))
+
                 res.json(product);
             })
 
@@ -104,6 +128,16 @@ module.exports = function (app) {
 
         })
 
+    })
+
+    //==================TODO to be deleted=====================
+    router.get("/users",function (req, res) {
+        wagner.invoke(function (User) {
+            User.findOne({}).populate("data.cart.product").exec(function (err, users) {
+                if(err)console.log(err)
+                res.send(users);
+            })
+        })
     })
 }
 
