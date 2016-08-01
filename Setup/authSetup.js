@@ -12,7 +12,9 @@ const ObjectId = require('mongoose').Types.ObjectId;
 module.exports = function (app) {
     //middleware
     app.use(session({
-        secret: 'keyboard cat'
+        secret: 'keyboard cat',
+        resave: true,
+        saveUninitialized: true
     }));
     app.use(passport.initialize());
     app.use(passport.session());
@@ -41,11 +43,12 @@ module.exports = function (app) {
         }))
     //FACEBOOK SETUP
     passport.use(new FacebookStrategy({
-        clientID: "585484321625125",
-        clientSecret: "992eacfdcc87afdba2542e64033e2045",
+        clientID: process.env.CLIENTID,
+        clientSecret: process.env.CLIENTSECRET,
         callbackURL: "http://localhost:3000/auth/facebook/callback"
     },function (accessToken, refreshToken, profile, done) {
         // console.log(profile)
+      
         var options = {
             new: true,
             upsert: true,

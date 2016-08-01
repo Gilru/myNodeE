@@ -3,6 +3,7 @@ const app = server();
 const api = require("./api");
 const wagner = require("wagner-core")
 const bodyParser = require("body-parser");
+require("./Setup/env")
 require("./Setup/authSetup")(app);
 require("./View/index")(app)
 
