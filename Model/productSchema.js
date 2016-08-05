@@ -5,7 +5,7 @@ var fx = require("./exchange")
 var Schema = mongoose.Schema;
 
 
-var productSchema = {
+var productSchema = new Schema({
     name: {
         type: String,
         required: true
@@ -41,9 +41,11 @@ var productSchema = {
     },
     category: Category.categorySchema
 
-}
+})
 
-var schema = new Schema(productSchema);
+productSchema.index({name: "text"})
+
+var schema = productSchema;
 var currencyToSymbol = {
     "USD": "$",
     "CAD": "$",

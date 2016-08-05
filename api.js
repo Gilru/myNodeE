@@ -6,6 +6,10 @@ const ObjectId = require('mongoose').Types.ObjectId;
 
 
 module.exports = function (app) {
+    //import stripe
+    var stripe = require("stripe")(
+        process.env.STRIPETESTTOKEN
+    );
 
     var router = express.Router();
     app.use("/api/v1", router)
@@ -48,7 +52,7 @@ module.exports = function (app) {
 
         var user = new User({
             profile: {
-                username:" Gilbert",
+                username: "Gilbert",
                 email: "example@email.com"
             },
             data: {
@@ -63,9 +67,6 @@ module.exports = function (app) {
 
         user.save();
     })
-
-
-
 
 
     //====================only create a quick database======================
@@ -92,11 +93,11 @@ module.exports = function (app) {
 
         wagner.invoke(function (Product) {
 
-           Product.find({_id: new ObjectId(req.params.id)},function (err, product) {
-               if (err)  res.status(status.INTERNAL_SERVER_ERROR).json(err.message);
+            Product.find({_id: new ObjectId(req.params.id)}, function (err, product) {
+                if (err)  res.status(status.INTERNAL_SERVER_ERROR).json(err.message);
 
-               res.json(product);
-           })
+                res.json(product);
+            })
 
         })
 
@@ -116,12 +117,30 @@ module.exports = function (app) {
         })
 
     })
+    //TODO to be tested
+    router.get("/products/:productName", function (req, res) {
+
+        wagner.invoke(function (Product) {
+
+            var query = Product.find({$text: {$search: req.params.productName}},
+                {score: {$meta: "textScore"}})
+                .sort({score: {$meta: "textScore"}})
+
+
+            query.exec(function (err,product) {
+                if (err) return console.log(err);
+                res.json(product);
+            })
+
+        })
+
+    })
     router.get("/product/category/:id", function (req, res) {
 
 
         wagner.invoke(function (Product) {
 
-            Product.find({"category._id": "Iphone"},function (err, product) {
+            Product.find({"category._id": "Iphone"}, function (err, product) {
                 if (err)  res.status(status.INTERNAL_SERVER_ERROR).json(err.message);
                 res.json(product);
             })
@@ -129,15 +148,72 @@ module.exports = function (app) {
         })
 
     })
+//==========TODO Build the add cart and test add cart and this one should only be for processing
+    router.post("/me/cart", function (req, res) {
+        var products = [];
+        if (!req.user) return res.status(status.INTERNAL_SERVER_ERROR).json({error: "can't access file"})
+        wagner.invoke(function (Product) {
+
+            Product.find(function (err, product) {
+                if (err)  return res.status(status.INTERNAL_SERVER_ERROR).json(err.message);
+
+                product.forEach(function (element) {
+                    products.push(element._id)
+                })
+
+
+                req.user.data.cart = [{product: product[0]._id}]
+
+
+                req.user.save(function (err, user) {
+
+                    if (err) return console.log(err);
+                    req.login(user, function (err) {
+                        if (err) return console.log(err)
+                        //STRIPE CHARGE
+                        stripe.charges.create({
+                            amount: 999,
+                            currency: "usd",
+                            source: process.env.STRIPESOURCETOKEN, // obtained with Stripe.js
+                            description: "Charge for the shopping"
+                        }, function (err, charge) {
+                            // asynchronously called
+                            if (err) return console.log(err)
+
+                            return res.redirect("/api/v1/users/" + user.profile.username)
+                        });
+
+
+                    })
+                })
+
+
+            })
+
+        })
+
+
+    })
 
     //==================TODO to be deleted=====================
-    router.get("/users",function (req, res) {
+    router.get("/users", function (req, res) {
         wagner.invoke(function (User) {
             User.findOne({}).populate("data.cart.product").exec(function (err, users) {
-                if(err)console.log(err)
+                if (err)console.log(err)
                 res.send(users);
             })
         })
+    })
+
+    router.get("/users/:username", function (req, res) {
+
+        res.json(req.user);
+        // wagner.invoke(function (User) {
+        //     User.findOne({_id: req.params}).populate("data.cart.product").exec(function (err, users) {
+        //         if (err)console.log(err)
+        //         res.send(users);
+        //     })
+        // })
     })
 }
 

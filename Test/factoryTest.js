@@ -2,25 +2,26 @@ const assert = require("assert");
 const wagner = require("wagner-core")
 const factory = require("../Setup/factory")(wagner);
 var product;
-beforeEach(deleteEverything)
+var cat;
+before(deleteEverything)
 
 describe("Category", function () {
     it("should create a new Category and Save it", function (done) {
         wagner.invoke(function (Category) {
-            var cat = new Category({
+            cat = new Category({
                 _id: "Iphone",
-                parent: "Electronics"
+                parent: "Electronic"
 
             })
 
             assert.equal(cat._id, "Iphone");
-            assert.equal(cat.parent, "Electronics");
+            assert.equal(cat.parent, "Electronic");
 
             cat.save(function (err, cat) {
                 Category.findOne({_id: "Iphone"}, function (err, cat) {
                     if (err) assert.ifError(err);
                     assert.equal(cat._id, "Iphone")
-                    assert.equal(cat.parent, "Electronics")
+                    assert.equal(cat.parent, "Electronic")
                     done();
                 })
             })
@@ -36,23 +37,24 @@ describe("Product", function () {
             product = new Product({
                 name: "Iphone",
                 price: {
-                    amount: 23,
-                    currency: "USD"
+                    amount: 15,
+                    currency: "EUR"
                 },
+                category: cat
 
 
             })
 
             assert.equal(product.name, "Iphone");
-            assert.equal(product.price.amount, 23);
-            assert.equal(product.displayPrice, "$23");
+            assert.equal(product.price.amount, 15);
+            assert.equal(product.displayPrice, "€15");
 
             product.save(function (err, cat) {
                 Product.findOne({name: "Iphone"}, function (err, cat) {
                     if (err) assert.ifError(err);
                     assert.equal(product.name, "Iphone");
-                    assert.equal(product.price.amount, 23);
-                    assert.equal(product.displayPrice, "$23");
+                    assert.equal(product.price.amount, 15);
+                    assert.equal(product.displayPrice, "€15");
                     done();
                 })
             })
@@ -71,7 +73,7 @@ describe("User", function () {
             console.log(product._id)
             var user = new User({
                 profile: {
-                    username: "gil",
+                    username: "Gilbert",
                     email: "example@email.com"
                 },
                 data: {
@@ -83,7 +85,7 @@ describe("User", function () {
 
             })
 
-            assert.equal(user.profile.username, "gil");
+            assert.equal(user.profile.username, "gilbert");
             assert.equal(user.profile.email, "example@email.com");
 
             user.save(function (err, cat) {
@@ -91,7 +93,7 @@ describe("User", function () {
                 User.findOne({username: "gil"}).populate("data.cart.product").exec(function (err, users) {
                     if (err)console.log(err)
 
-                    assert.equal(user.profile.username, "gil")
+                    assert.equal(user.profile.username, "gilbert")
                     assert.equal(user.profile.email, "example@email.com")
                     assert.equal(user.data.cart[0].product, product._id)
                     done();
@@ -105,9 +107,6 @@ describe("User", function () {
 
     })
 })
-
-
-after(deleteEverything)
 
 
 function deleteEverything() {

@@ -43,7 +43,8 @@ module.exports = new Schema({
                 type: Number,
                 default: 1,
                 min: 1
-            }
+            },
+            _id: false
 
         }]
     }
