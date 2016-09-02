@@ -215,6 +215,13 @@ module.exports = function (app) {
         //     })
         // })
     })
+
+    router.get("/user",function (req, res) {
+        if (req.user)
+            return res.json(req.user);
+        else
+            return res.status(status.FORBIDDEN).json({ error: 'please login first' });
+    })
 }
 
 
